@@ -1,0 +1,28 @@
+name: Auto Commit
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Menjalankan setiap hari pada pukul 00:00 UTC
+  push:
+    branches:
+      - main  # Berjalan otomatis jika ada perubahan di branch "main"
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Buat Perubahan Otomatis (Opsional)
+        run: |
+          echo "Auto update on $(date)" >> auto-update.txt
+          git add auto-update.txt
+
+      - name: Commit Perubahan
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+          git commit -m "Auto commit: update on $(date)" || echo "No changes to commit"
+          git push
