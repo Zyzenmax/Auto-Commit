@@ -20,21 +20,22 @@ jobs:
         with:
           fetch-depth: 0  # Mengambil seluruh riwayat commit
 
-      # 🔹 Loop untuk mengisi commit yang terlewat selama 30 hari terakhir
+      # 🔹 Mengisi commit untuk 30 hari terakhir
       - name: Commit Backdate 31 Hari Lalu
         run: |
           for i in {31..1}; do
             DATE=$(date -d "$i days ago" "+%Y-%m-%dT12:00:00")
             echo "Backdated commit on $DATE" >> auto-update.txt
             git add auto-update.txt
-            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit -m "Backdated commit on $DATE" || echo "No changes to commit"
+            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit -m "Backdated commit on $DATE"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
+            sleep 2  # Tunggu sebentar agar GitHub membaca perubahan
           done
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
 
       # 🔹 Auto commit untuk hari ini
       - name: Auto Commit Hari Ini
         run: |
-          echo "Auto update on $(date)" >> auto-update.txt
+          echo "Auto update on $(date +'%Y-%m-%d %H:%M:%S')" >> auto-update.txt
           git add auto-update.txt
-          git commit -m "Auto commit: update on $(date)" || echo "No changes to commit"
+          git commit -m "Auto commit: update on $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
