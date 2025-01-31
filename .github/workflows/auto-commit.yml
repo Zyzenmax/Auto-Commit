@@ -2,10 +2,8 @@ name: Auto Commit & Backdate
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Menjalankan setiap hari pukul 00:00 UTC
-  push:
-    branches:
-      - main
+    - cron: '0 0 * * *'  # Jalan setiap hari jam 00:00 UTC
+  workflow_dispatch:  # Bisa dijalankan manual
 
 permissions:
   contents: write
@@ -18,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Mengambil seluruh riwayat commit
+          fetch-depth: 0  # Ambil seluruh riwayat commit
 
       - name: Setup Git
         run: |
@@ -32,9 +30,9 @@ jobs:
             DATE=$(date -d "$i days ago" "+%Y-%m-%dT12:00:00")
             echo "Backdated commit on $DATE" >> auto-update.txt
             git add auto-update.txt
-            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit --amend --no-edit || echo "No changes to commit"
-            git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
-            sleep 2  # Tunggu sebentar agar GitHub membaca perubahan
+            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit --date="$DATE" -m "Backdated commit on $DATE"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
+            sleep 2
           done
 
       - name: Auto Commit Hari Ini
@@ -42,4 +40,4 @@ jobs:
           echo "Auto update on $(date +'%Y-%m-%d %H:%M:%S')" >> auto-update.txt
           git add auto-update.txt
           git commit -m "Auto commit: update on $(date +'%Y-%m-%d')" || echo "No changes to commit"
-          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
