@@ -24,10 +24,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Pull Latest Changes
-        run: |
-          git pull --rebase
+          git pull origin main || echo "Branch is up to date"
 
       - name: Commit Backdate 30 Hari Lalu
         run: |
@@ -35,9 +32,9 @@ jobs:
             DATE=$(date -d "$i days ago" "+%Y-%m-%dT12:00:00")
             echo "Backdated commit on $DATE" >> auto-update.txt
             git add auto-update.txt
-            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit -m "Backdated commit on $DATE"
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
-            sleep 2
+            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit --amend --no-edit || echo "No changes to commit"
+            git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+            sleep 2  # Tunggu sebentar agar GitHub membaca perubahan
           done
 
       - name: Auto Commit Hari Ini
@@ -45,4 +42,4 @@ jobs:
           echo "Auto update on $(date +'%Y-%m-%d %H:%M:%S')" >> auto-update.txt
           git add auto-update.txt
           git commit -m "Auto commit: update on $(date +'%Y-%m-%d')" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "No changes to push"
+          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
