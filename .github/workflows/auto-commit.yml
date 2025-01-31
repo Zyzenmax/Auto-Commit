@@ -2,10 +2,13 @@ name: Auto Commit
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Menjalankan setiap hari pada pukul 00:00 UTC
+    - cron: '0 0 * * *'  # Menjalankan setiap hari pukul 00:00 UTC
   push:
     branches:
       - main  # Berjalan otomatis jika ada perubahan di branch "main"
+
+permissions:
+  contents: write  # Memberikan izin untuk melakukan push
 
 jobs:
   commit:
@@ -14,8 +17,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Mengambil seluruh riwayat commit
 
-      - name: Buat Perubahan Otomatis (Opsional)
+      - name: Buat Perubahan Otomatis
         run: |
           echo "Auto update on $(date)" >> auto-update.txt
           git add auto-update.txt
@@ -23,6 +28,9 @@ jobs:
       - name: Commit Perubahan
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions@github.com"
-          git commit -m "Auto commit: update on $(date)" || echo "No changes to commit"
-          git push
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "Auto commit: update on $(date)" || echo "No changes to commit"
+
+      - name: Push Perubahan
+        run: |
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
