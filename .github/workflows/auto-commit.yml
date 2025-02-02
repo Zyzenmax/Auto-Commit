@@ -24,10 +24,10 @@ jobs:
           git config --global user.email "bagushasanali78@gmail.com"
           git pull origin main || echo "Branch is up to date"
 
-      - name: Commit Backdate 31 Hari Lalu
+      - name: Commit Backdate 2 Hari Lalu
         run: |
-          for i in {31..1}; do
-            # Menentukan tanggal backdate 30 hari yang lalu
+          for i in {2..1}; do
+            # Menentukan tanggal backdate 2 hari yang lalu
             DATE=$(date -d "$i days ago" "+%Y-%m-%dT12:00:00")
             echo "Backdated commit on $DATE" >> auto-update.txt
 
